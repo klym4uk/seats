@@ -1,21 +1,29 @@
 <?php
 // Employee sidebar
+$current_script_path = $_SERVER['SCRIPT_NAME'];
+$app_path_segment = parse_url(APP_URL, PHP_URL_PATH);
+if ($app_path_segment === null || $app_path_segment === false || $app_path_segment === '/') {
+    $app_path_segment = ''; // Handle cases where APP_URL might not have a path or is just '/'
+}
 ?>
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
     <div class="position-sticky pt-3">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/index.php">
+                <?php $is_active = str_ends_with($current_script_path, $app_path_segment . '/employee/index.php') || str_ends_with($current_script_path, $app_path_segment . '/employee/'); ?>
+                <a class="nav-link <?php echo $is_active ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/index.php">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'modules.php' || basename($_SERVER['PHP_SELF']) == 'module.php' ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/modules.php">
+                <?php $is_active = str_ends_with($current_script_path, $app_path_segment . '/employee/modules.php') || str_ends_with($current_script_path, $app_path_segment . '/employee/module.php'); ?>
+                <a class="nav-link <?php echo $is_active ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/modules.php">
                     <i class="bi bi-journal-text"></i> My Modules
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/profile.php">
+                <?php $is_active = str_ends_with($current_script_path, $app_path_segment . '/employee/profile.php'); ?>
+                <a class="nav-link <?php echo $is_active ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/profile.php">
                     <i class="bi bi-person-circle"></i> Profile
                 </a>
             </li>
@@ -26,7 +34,8 @@
         </h6>
         <ul class="nav flex-column mb-2">
             <li class="nav-item">
-                <a class="nav-link" href="<?php echo APP_URL; ?>/employee/resources.php">
+                <?php $is_active = str_ends_with($current_script_path, $app_path_segment . '/employee/resources.php'); ?>
+                <a class="nav-link <?php echo $is_active ? 'active' : ''; ?>" href="<?php echo APP_URL; ?>/employee/resources.php">
                     <i class="bi bi-file-earmark-text"></i> Security Resources
                 </a>
             </li>

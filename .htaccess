@@ -1,0 +1,67 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Set the base directory
+RewriteBase /seats/
+
+# Redirect to index.php if the requested file or directory doesn't exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# Security headers
+<IfModule mod_headers.c>
+    # Protect against XSS attacks
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Prevent MIME-type sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Prevent clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # Enable HSTS (HTTP Strict Transport Security)
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Disable caching for sensitive pages
+    <FilesMatch "\.(php)$">
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    </FilesMatch>
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Prevent access to sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^(composer\.json|composer\.lock|package\.json|package-lock\.json|README\.md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# PHP settings
+<IfModule mod_php.c>
+    # Maximum upload file size
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    
+    # Maximum execution time
+    php_value max_execution_time 30
+    
+    # Maximum input time
+    php_value max_input_time 60
+    
+    # Memory limit
+    php_value memory_limit 128M
+    
+    # Error reporting (development)
+    php_flag display_errors On
+    php_value error_reporting E_ALL
+</IfModule>
+

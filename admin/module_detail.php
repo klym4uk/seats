@@ -6,6 +6,35 @@ require_once '../classes/Module.php';
 require_once '../classes/Lesson.php';
 require_once '../classes/Quiz.php';
 
+// Helper function to convert YouTube URLs to embed URLs
+function convertToEmbedUrl($url) {
+    $embedUrl = $url; // Default to original URL
+    if (strpos($url, 'youtube.com/watch?v=') !== false) {
+        parse_str(parse_url($url, PHP_URL_QUERY), $queryParams);
+        if (!empty($queryParams['v'])) {
+            $embedUrl = 'https://www.youtube.com/embed/' . $queryParams['v'];
+        }
+    } elseif (strpos($url, 'youtu.be/') !== false) {
+        $path = parse_url($url, PHP_URL_PATH);
+        $videoId = ltrim($path, '/');
+        if (!empty($videoId)) {
+            $embedUrl = 'https://www.youtube.com/embed/' . $videoId;
+        }
+    } elseif (strpos($url, 'youtube.com/live/') !== false) {
+        $path = parse_url($url, PHP_URL_PATH); // e.g., /live/VIDEO_ID
+        $parts = explode('/', $path);
+        $videoId = end($parts);
+        if (!empty($videoId)) {
+            $embedUrl = 'https://www.youtube.com/embed/' . $videoId;
+        }
+    }
+    // Optionally, add checks for existing embed URLs to prevent double-embedding
+    if (strpos($url, 'youtube.com/embed/') !== false) {
+        return $url; // Already an embed URL
+    }
+    return $embedUrl;
+}
+
 // Set page title
 $pageTitle = 'Module Details';
 
@@ -68,6 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'content_type' => $_POST['content_type'],
             'order_number' => $_POST['order_number']
         ];
+
+        // If content type is video, convert URL to embed URL
+        if (isset($lessonData['content_type']) && $lessonData['content_type'] === 'video' && isset($lessonData['content'])) {
+            $lessonData['content'] = convertToEmbedUrl($lessonData['content']);
+        }
         
         // Update existing lesson
         if (!empty($_POST['lesson_id'])) {
@@ -331,7 +365,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit_lesson' && isset($_GET['
                                                                         <select class="form-select" id="content_type<?php echo $lesson['lesson_id']; ?>" name="content_type" required>
                                                                             <option value="text" <?php echo $lesson['content_type'] == 'text' ? 'selected' : ''; ?>>Text</option>
                                                                             <option value="video" <?php echo $lesson['content_type'] == 'video' ? 'selected' : ''; ?>>Video</option>
-                                                                            <option value="image" <?php echo $lesson['content_type'] == 'image' ? 'selected' : ''; ?>>Image</option>
                                                                         </select>
                                                                     </div>
                                                                     
@@ -539,7 +572,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit_lesson' && isset($_GET['
                         <select class="form-select" id="content_type" name="content_type" required onchange="toggleContentField()">
                             <option value="text" selected>Text</option>
                             <option value="video">Video</option>
-                            <option value="image">Image</option>
                         </select>
                     </div>
                     
